@@ -1,0 +1,9 @@
+name = "allowlist"
+main = "src/worker.ts"
+compatibility_date = "2024-07-23"
+workers_dev = true
+compatibility_flags = [ "nodejs_compat" ]
+
+[vars]
+OTEL_EXPORTER_OTLP_ENDPOINT = "https://gateway.otlp.arusah.com:443/v1/traces"
+OTEL_EXPORTER_PAT = "<PAT>"
