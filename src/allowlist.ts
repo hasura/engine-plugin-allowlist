@@ -22,22 +22,21 @@ for (let i = 0; i < allowlist.length; i++) {
 
 export const allowlistHandler = (request) => {
   return tracer.startActiveSpan("Handle request", async (span) => {
-    tracer.startActiveSpan("Authenticate", async (span) => {
-      if (
-        request.headers === null ||
-        request.headers.get("hasura-m-auth") !== Config.headers["hasura-m-auth"]
-      ) {
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: String("Unauthorized request!"),
-        });
-        span.end();
-        let response = new Blob([
-          JSON.stringify({ message: "unauthorized request" }),
-        ]);
-        return new Response(response, { status: 400 });
-      }
-    })
+    // Authentication
+    if (
+      request.headers === null ||
+      request.headers.get("hasura-m-auth") !== Config.headers["hasura-m-auth"]
+    ) {
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: String("Unauthorized request!"),
+      });
+      span.end();
+      let response = new Blob([
+        JSON.stringify({ message: "unauthorized request" }),
+      ]);
+      return new Response(response, { status: 400 });
+    }
     // Parse the query
     let rawRequest = <PreParsePluginRequest>await request.json();
 
@@ -66,8 +65,7 @@ export const allowlistHandler = (request) => {
         ]);
         return new Response(response, { status: 400 });
       }
-    }
-    else {
+    } else {
       span.setStatus({
         code: SpanStatusCode.OK,
         message: String("Malformed request!"),

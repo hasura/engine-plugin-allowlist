@@ -17,7 +17,7 @@ Deploy the allowlist-plugin (as a lambda) using Cloudflare workers :
 
 - Generate project files:
   ```sh
-  wrangler generate allowlist-plugin https://github.com/paritosh-08/allowlist-plugin-template
+  wrangler generate allowlist-plugin https://github.com/hasura/plugin-allowlist
   ```
 
 - Install:
@@ -49,7 +49,12 @@ definition:
   pre: parse
   config:
     request:
-      headers: {}
+      headers:
+        additional:
+          hasura-m-auth:
+            value: <your-secret-token>
+          forward:
+            - my-header
       session: {}
       rawRequest:
         query: {}

@@ -8,13 +8,15 @@
  * Learn more at https://developers.cloudflare.com/workers/
  */
 
+import { trace } from "@opentelemetry/api";
 import { allowlistHandler } from "./allowlist";
 import { instrument, ResolveConfigFn } from "@microlabs/otel-cf-workers";
 
 const handler = {
   async fetch(request, env, ctx) {
-    return allowlistHandler(request)
-  }
+    trace.getActiveSpan()?.setAttribute("internal.visibility", String("user"));
+    return allowlistHandler(request);
+  },
 };
 
 const resolveConfig: ResolveConfigFn = (env, _trigger) => {
