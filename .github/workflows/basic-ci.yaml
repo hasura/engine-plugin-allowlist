@@ -1,0 +1,21 @@
+on: [push]
+
+name: build
+
+jobs:
+  build:
+    name: Check v3-engine
+    runs-on: ubuntu-latest
+    env:
+      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+      RUSTFLAGS: "-D warnings" # fail on warnings
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install tools
+        run: |
+          yarn
+
+      - name: build everything
+        run: |
+          cargo check --all-targets
