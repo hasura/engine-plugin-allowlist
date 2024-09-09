@@ -1,10 +1,10 @@
 {
-	"compilerOptions": {
-		"target": "esnext",
+  "compilerOptions": {
+    "target": "esnext",
     "moduleResolution": "node",
-		//    "alwaysStrict": true,
-		"strict": false,
-		"allowJs": true
-	},
-	"include": ["src"]
+    //    "alwaysStrict": true,
+    "strict": false,
+    "allowJs": true
+  },
+  "include": ["src"]
 }

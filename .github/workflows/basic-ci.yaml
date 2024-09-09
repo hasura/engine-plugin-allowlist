@@ -4,18 +4,29 @@ name: build
 
 jobs:
   build:
-    name: Check v3-engine
+    name: Typecheck
     runs-on: ubuntu-latest
-    env:
-      CARGO_NET_GIT_FETCH_WITH_CLI: "true"
-      RUSTFLAGS: "-D warnings" # fail on warnings
     steps:
       - uses: actions/checkout@v4
 
       - name: install tools
         run: |
-          yarn
+          npm install
 
-      - name: build everything
+      - name: typecheck with tsc
         run: |
-          cargo check --all-targets
+          npm run typecheck
+
+  format:
+    name: Check formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: install tools
+        run: |
+          npm install
+
+      - name: check formatting
+        run: |
+          run run lint
