@@ -133,4 +133,5 @@ dist
 .wrangler
 
 # direnv
+.direnv/
 .envrc.local
