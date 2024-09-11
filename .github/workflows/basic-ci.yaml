@@ -29,4 +29,4 @@ jobs:
 
       - name: check formatting
         run: |
-          run run lint
+          npm run lint
