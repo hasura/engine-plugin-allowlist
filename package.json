@@ -5,7 +5,10 @@
   "scripts": {
     "deploy": "wrangler deploy",
     "dev": "wrangler dev",
-    "start": "wrangler dev"
+    "start": "wrangler dev",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "lint": "npx --yes prettier --check .",
+    "format": "npx --yes prettier --write ."
   },
   "devDependencies": {
     "wrangler": "^3.71.0"

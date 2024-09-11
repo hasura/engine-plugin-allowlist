@@ -131,3 +131,7 @@ dist
 
 # Cloudflare wrangler
 .wrangler
+
+# direnv
+.direnv/
+.envrc.local

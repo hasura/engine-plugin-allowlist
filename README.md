@@ -1,4 +1,5 @@
 # plugin-allowlist
+
 Allowlist engine plugin for v3
 
 Deploy the allowlist-plugin (as a lambda) using Cloudflare workers :
@@ -6,26 +7,31 @@ Deploy the allowlist-plugin (as a lambda) using Cloudflare workers :
 - Create an account on cloudflare.
 
 - Install wrangler:
+
   ```sh
   npm install -g wrangler
   ```
 
 - Login:
+
   ```sh
   wrangler login
   ```
 
 - Generate project files:
+
   ```sh
   wrangler generate allowlist-plugin https://github.com/hasura/plugin-allowlist
   ```
 
 - Install:
+
   ```sh
   cd allowlist-plugin && npm i
   ```
 
 - For local development:
+
   ```sh
   npm start
   ```
@@ -36,6 +42,7 @@ Deploy the allowlist-plugin (as a lambda) using Cloudflare workers :
   ```
 
 ## Using the plugin
+
 Update the metadata to add the plugin-related config (in global subgraph). Also,
 add the env vars for the URL of local dev and cloud deployment:
 
@@ -62,6 +69,7 @@ definition:
 ```
 
 Build DDN supergraph:
-  ```sh
-  ddn supergraph build
-  ```
+
+```sh
+ddn supergraph build
+```
