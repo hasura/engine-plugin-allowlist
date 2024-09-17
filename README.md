@@ -43,7 +43,7 @@ To run the plugin locally, you can use the following steps:
 - Generate project files:
 
   ```sh
-  wrangler generate allowlist-plugin https://github.com/hasura/plugin-allowlist
+  wrangler generate allowlist-plugin https://github.com/hasura/engine-plugin-allowlist
   ```
 
 - Install:
