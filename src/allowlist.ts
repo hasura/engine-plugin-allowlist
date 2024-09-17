@@ -19,7 +19,7 @@ let allowlist = Config.allowlist;
 let hashSetAllowlist = new Set();
 for (let i = 0; i < allowlist.length; i++) {
   hashSetAllowlist.add(
-    JSON.stringify(parse(allowlist[i], { noLocation: true }).definitions)
+    JSON.stringify(parse(allowlist[i], { noLocation: true }).definitions),
   );
 }
 
