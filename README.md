@@ -20,7 +20,7 @@ The plugin can be configured using the config.ts file. The configuration include
 
 - `headers.hasura-m-auth`: The secret token that is used to authenticate the incoming requests.
 - `allowlist`: The list of queries that are allowed to be executed.
-- `superuserRole`: The role that is allowed to execute all queries.
+- `allowedRoles`: The roles that are allowed to execute all queries.
 
 ## Development
 

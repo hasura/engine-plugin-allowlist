@@ -47,6 +47,7 @@ export const allowlistHandler = (request) => {
       const query = rawRequest.rawRequest.query;
       // All queries are allowed for superuser roles
       if (
+        Config.allowedRoles &&
         Config.allowedRoles.length > 0 &&
         Config.allowedRoles.includes(rawRequest.session.role)
       ) {
