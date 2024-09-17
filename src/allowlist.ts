@@ -45,10 +45,10 @@ export const allowlistHandler = (request) => {
 
     if (rawRequest.rawRequest && rawRequest.rawRequest.query) {
       const query = rawRequest.rawRequest.query;
-      // All queries are allowed for superuser role
+      // All queries are allowed for superuser roles
       if (
-        Config.superuserRole !== null &&
-        rawRequest.session.role === Config.superuserRole
+        Config.allowedRoles.length > 0 &&
+        Config.allowedRoles.includes(rawRequest.session.role)
       ) {
         span.setStatus({
           code: SpanStatusCode.OK,
