@@ -8,7 +8,7 @@ interface PreParsePluginRequest {
   };
   session: {
     role: string;
-  }
+  };
 }
 
 // OTLP setup
@@ -19,7 +19,7 @@ let allowlist = Config.allowlist;
 let hashSetAllowlist = new Set();
 for (let i = 0; i < allowlist.length; i++) {
   hashSetAllowlist.add(
-    JSON.stringify(parse(allowlist[i], { noLocation: true }).definitions),
+    JSON.stringify(parse(allowlist[i], { noLocation: true }).definitions)
   );
 }
 
@@ -43,10 +43,13 @@ export const allowlistHandler = (request) => {
     // Parse the query
     let rawRequest = <PreParsePluginRequest>await request.json();
 
-    const query = rawRequest.rawRequest.query;
-    if (query !== undefined) {
+    if (rawRequest.rawRequest && rawRequest.rawRequest.query) {
+      const query = rawRequest.rawRequest.query;
       // All queries are allowed for superuser role
-      if (Config.superuserRole !== null && rawRequest.session.role === Config.superuserRole) {
+      if (
+        Config.superuserRole !== null &&
+        rawRequest.session.role === Config.superuserRole
+      ) {
         span.setStatus({
           code: SpanStatusCode.OK,
           message: String("Superuser role!"),
@@ -56,7 +59,7 @@ export const allowlistHandler = (request) => {
         return new Response(null, { status: 204 });
       }
       try {
-        // Parse the query
+        // Parse the graphql query
         const parsedQuery = parse(query, { noLocation: true }).definitions;
         const stringifiedParsedQuery = JSON.stringify(parsedQuery);
         // Check if the query is in the allowlist
@@ -80,8 +83,7 @@ export const allowlistHandler = (request) => {
           ]);
           return new Response(response, { status: 400 });
         }
-      }
-      catch (e) {
+      } catch (e) {
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: String("Malformed request! " + e),
@@ -92,7 +94,6 @@ export const allowlistHandler = (request) => {
         ]);
         return new Response(response, { status: 500 });
       }
-      
     } else {
       span.setStatus({
         code: SpanStatusCode.OK,
