@@ -6,6 +6,9 @@ interface PreParsePluginRequest {
   rawRequest: {
     query: string;
   };
+  session: {
+    role: string;
+  }
 }
 
 // OTLP setup
@@ -42,29 +45,54 @@ export const allowlistHandler = (request) => {
 
     const query = rawRequest.rawRequest.query;
     if (query !== undefined) {
-      const parsedQuery = parse(query, { noLocation: true }).definitions;
-      const stringifiedParsedQuery = JSON.stringify(parsedQuery);
-      // Check if the query is in the allowlist
-      if (hashSetAllowlist.has(stringifiedParsedQuery)) {
+      // All queries are allowed for superuser role
+      if (Config.superuserRole !== null && rawRequest.session.role === Config.superuserRole) {
         span.setStatus({
           code: SpanStatusCode.OK,
-          message: String("Query allowed!"),
+          message: String("Superuser role!"),
         });
         span.setAttribute("internal.visibility", String("user"));
         span.end();
         return new Response(null, { status: 204 });
-      } else {
+      }
+      try {
+        // Parse the query
+        const parsedQuery = parse(query, { noLocation: true }).definitions;
+        const stringifiedParsedQuery = JSON.stringify(parsedQuery);
+        // Check if the query is in the allowlist
+        if (hashSetAllowlist.has(stringifiedParsedQuery)) {
+          span.setStatus({
+            code: SpanStatusCode.OK,
+            message: String("Query allowed!"),
+          });
+          span.setAttribute("internal.visibility", String("user"));
+          span.end();
+          return new Response(null, { status: 204 });
+        } else {
+          span.setStatus({
+            code: SpanStatusCode.OK,
+            message: String("Query not allowed!"),
+          });
+          span.setAttribute("internal.visibility", String("user"));
+          span.end();
+          let response = new Blob([
+            JSON.stringify({ message: "Query not allowed" }),
+          ]);
+          return new Response(response, { status: 400 });
+        }
+      }
+      catch (e) {
         span.setStatus({
-          code: SpanStatusCode.OK,
-          message: String("Query not allowed!"),
+          code: SpanStatusCode.ERROR,
+          message: String("Malformed request! " + e),
         });
-        span.setAttribute("internal.visibility", String("user"));
         span.end();
         let response = new Blob([
-          JSON.stringify({ message: "Query not allowed" }),
+          JSON.stringify({ message: "Malformed request" }),
         ]);
-        return new Response(response, { status: 400 });
+        return new Response(response, { status: 500 });
       }
+      
     } else {
       span.setStatus({
         code: SpanStatusCode.OK,
