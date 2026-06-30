@@ -1,90 +1,81 @@
-# plugin-allowlist
+# engine-plugin-allowlist
 
-Allowlist engine plugin for DDN.
+Allowlist engine plugin for Hasura DDN.
 
-Hasura DDN allows you to add engine plugins to the supergraph ([docs](https://hasura.io/docs/3.0/plugins/overview/)).
-Engine plugins are used to extend the functionality of the DDN supergraph. This plugin is used to allowlist the requests
-to the DDN supergraph.
+Hasura DDN lets you extend the supergraph with engine plugins ([docs](https://hasura.io/docs/3.0/plugins/overview/)). This plugin allowlists the GraphQL requests that reach your DDN supergraph: requests that aren't on the allowlist are rejected before they're parsed.
 
-**Note**: This plugin should be used as a pre-parse plugin.
+> **Note:** This plugin must be used as a **pre-parse** plugin.
 
 ## How it works
 
-The plugin starts up a server that listens for incoming requests. It checks if the incoming graphql query is allowed
-based on the allowlist configuration. If the query is allowed, it indicates the same to the DDN engine. If the query is
-not allowed, it returns an error response (visible to the end user).
+The plugin runs a server that receives each incoming request from the DDN engine, authenticates it with a shared secret, and checks the GraphQL query against the configured allowlist. Allowed queries are passed through; disallowed queries return an error response that is visible to the end user. Roles listed in `allowedRoles` bypass the per-query check and may run any query.
 
 ## Configuration
 
-The plugin can be configured using the config.ts file. The configuration includes the following:
+Configure the plugin in `src/config.ts`:
 
-- `headers.hasura-m-auth`: The secret token that is used to authenticate the incoming requests.
-- `allowlist`: The list of queries that are allowed to be executed.
-- `allowedRoles`: The roles that are allowed to execute all queries.
+- `headers.hasura-m-auth` — shared secret used to authenticate requests coming from the DDN engine. **Replace the checked-in default with your own secret before deploying.**
+- `allowlist` — the list of GraphQL queries that are allowed to run.
+- `allowedRoles` — roles that are allowed to run any query, bypassing the allowlist.
+
+### Observability (optional)
+
+Traces are exported via OpenTelemetry. Set these in `wrangler.toml` (or your worker's environment vars):
+
+- `OTEL_EXPORTER_OTLP_ENDPOINT` — your OTLP collector endpoint.
+- `OTEL_EXPORTER_PAT` — Hasura PAT used to authenticate trace export. This is required for end-to-end tracing with Hasura DDN.
 
 ## Development
 
-**Note**: We are using Cloudflare wrangler for local development and deployment. However, you can use any other tool
-for the same. You will have to modify the files accordingly.
+The plugin is written in TypeScript. The source lives in the `src` directory, and the core allowlist logic is in `src/allowlist.ts`.
 
-The plugin is written in TypeScript. The source code is present in the `src` directory. The core logic for the allowlist
-plugin is present in the `src/allowlist.ts` file.
+It is deployed with Cloudflare Wrangler, but you can adapt the files for any other host.
+
+### Setup
+
+Clone the repo and install dependencies:
+
+```sh
+git clone https://github.com/hasura/engine-plugin-allowlist
+cd engine-plugin-allowlist
+npm install
+```
+
+Alternatively, this repo ships a Nix flake with direnv. With Nix and direnv installed, run `direnv allow` to drop into a dev shell with the toolchain ready. This is the path CI uses.
 
 ### Local development
 
-To run the plugin locally, you can use the following steps:
+Start a local dev server:
 
-- Install wrangler:
+```sh
+npm start
+```
 
-  ```sh
-  npm install -g wrangler
-  ```
+It listens on port `8787` by default. The server URL is printed in the terminal.
 
-- Generate project files:
+### Checks
 
-  ```sh
-  wrangler generate allowlist-plugin https://github.com/hasura/engine-plugin-allowlist
-  ```
+- `npm run typecheck` — type-check with `tsc`.
+- `npm run lint` — check formatting with Prettier.
+- `npm run format` — apply Prettier formatting.
 
-- Install:
-
-  ```sh
-  cd allowlist-plugin && npm i
-  ```
-
-- For starting up the local development server:
-
-  ```sh
-  npm start
-  ```
-
-The above command will start a local server that listens for incoming requests. The server runs on port 8787 by default.
-The URL of the local server will be displayed in the terminal.
+These run in CI on every push.
 
 ### Cloud deployment
 
-For cloud deployment, you can use the following steps in addition to the local development steps:
+Deploy to Cloudflare Workers:
 
-- Create an account on cloudflare.
+- Create a Cloudflare account.
+- Log in: `wrangler login`
+- Deploy: `npm run deploy`
 
-- Login:
+The deployed plugin URL is printed in the terminal.
 
-  ```sh
-  wrangler login
-  ```
-
-- For cloud deployment:
-  ```sh
-  npm run deploy
-  ```
-
-The above command should deploy the allowlist-plugin (as a lambda) using Cloudflare workers. The URL of the deployed
-plugin will be displayed in the terminal.
+> Wrangler ships as a dev dependency, so run it via the npm scripts above or `npx wrangler`.
 
 ## Using the plugin in DDN
 
-Update the metadata to add the plugin-related config (in global subgraph). Also,
-add the env vars for the URL of local dev and cloud deployment:
+Update the metadata to add the plugin config (in the global subgraph), and add env vars for the local-dev and cloud-deployment URLs:
 
 ```yaml
 kind: LifecyclePluginHook
@@ -108,11 +99,6 @@ definition:
         variables: {}
 ```
 
-Build DDN supergraph:
+Build the DDN supergraph: `ddn supergraph build create`
 
-```sh
-ddn supergraph build create
-```
-
-**Note**: For end-to-end tracing, you would have to update the `wrangler.toml` file to add the Hasura PAT in
-`OTEL_EXPORTER_PAT` var.
+> **Note:** For end-to-end tracing, set the Hasura PAT in the `OTEL_EXPORTER_PAT` var (see [Observability](#observability-optional)).
